@@ -8,24 +8,26 @@
     
     guardian.js.modules = {
         order                       : '@static("javascripts/order.min.js")', // must be first
-        ads                         : '@static("javascripts/libs/ads.min.js")',
-        analytics                   : '@static("javascripts/libs/analytics.min.js")',
-        basicTemplate               : '@static("javascripts/libs/basicTemplate.min.js")',
+
+        //hosted on 3rd party
         bean                        : 'http://6.gu-pasteup.appspot.com/js/libs/bean.min',
         bonzo                       : 'http://6.gu-pasteup.appspot.com/js/libs/bonzo.test.min',
-        commonPlugins               : '@static("javascripts/commonPlugins.min.js")',
-        //detect                      : 'http://6.gu-pasteup.appspot.com/js/detect/detect.js',
-        detect                      : '@static("javascripts/detect/detect.min.js")',
-        discussionBinder            : '@static("javascripts/libs/discussionBinder.min.js")',
         $dom                        : 'http://6.gu-pasteup.appspot.com/js/libs/dollardom.amd.js',
-        expanderBinder              : '@static("javascripts/libs/expanderBinder.min.js")',
-        fetchDiscussion             : '@static("javascripts/libs/fetchDiscussion.min.js")',
-        $g                          : '@static("javascripts/libs/g.min.js")',
-        guardianUtils               : '@static("javascripts/libs/guardianUtils.min.js")',
-        //images                      : 'http://6.gu-pasteup.appspot.com/js/detect/images.js',
-        images                      : '@static("javascripts/detect/images.min.js")',
         qwery                       : 'http://6.gu-pasteup.appspot.com/js/libs/qwery.min',
         reqwest                     : 'http://6.gu-pasteup.appspot.com/js/libs/reqwest',
+
+        //common
+        $g                          : '@static("javascripts/libs/g.min.js")',
+//        ads                         : '@static("javascripts/libs/ads.min.js")',
+//        analytics                   : '@static("javascripts/libs/analytics.min.js")',
+        basicTemplate               : '@static("javascripts/libs/basicTemplate.min.js")',
+        commonPlugins               : '@static("javascripts/commonPlugins.min.js")',
+        detect                      : '@static("javascripts/detect/detect.min.js")',
+        discussionBinder            : '@static("javascripts/libs/discussionBinder.min.js")',
+        expanderBinder              : '@static("javascripts/libs/expanderBinder.min.js")',
+        fetchDiscussion             : '@static("javascripts/libs/fetchDiscussion.min.js")',
+        guardianUtils               : '@static("javascripts/libs/guardianUtils.min.js")',
+        images                      : '@static("javascripts/detect/images.min.js")',
         topNav                      : '@static("javascripts/libs/topNav.min.js")',
         trailblockGenerator         : '@static("javascripts/libs/trailblockGenerator.min.js")',
         writeCapture                : 'order!@static("javascripts/libs/writeCapture.min.js")',
