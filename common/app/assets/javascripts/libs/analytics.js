@@ -1,51 +1,66 @@
 s_account = guardian.page.omnitureAccount;
 
-require([
+define([
     'http://static.guim.co.uk/static/ad0511f704894b072867e61615a7d577d265dd03/common/scripts/omniture-H.24.1.1.js',
     guardian.page.ophanScript,
     guardian.js.modules.detect,
     "bean"
-    ], 
+    ],
     function (omniture, ophan, detect, bean) {
 
-        s.linkInternalFilters += ',localhost,gucode.co.uk,gucode.com,guardiannews.com';
+        var Omniture = {
+          
+            truncate: function(string, n) {
+                return (string.length > n) ? string.substring(0, n) : string;
+            },
+        
+            getPageProperty: function(property) {
+                return guardian.page[property] || '';
+            },
 
-        var webTitle = (guardian.page.webTitle || '').trim();
-        if (webTitle.length > 72) {
-            webTitle = webTitle.substring(0, 72);
+            setOmnitureProperties: function() {
+                
+                s.linkInternalFilters += ',localhost,gucode.co.uk,gucode.com,guardiannews.com';
+                
+                s.pageName  = this.truncate((guardian.page.webTitle || '').trim(), 72) +
+                                ':' + (guardian.page.contentType || '') + ':' + (guardian.page.pageCode || '');
+                s.prop30    = (guardian.page.webTitle) ? 'content' : 'non-content';
+                
+                s.prop48    = detect.getConnectionSpeed();
+                s.prop56    = detect.getLayoutMode();
+            
+                var mappings = {
+                       prop9:    'contentType',
+                       pageType: 'pageType',
+                       channel:  'section',
+                       prop4:    'keywords',
+                       prop6:    'author',
+                       prop8:    'pageCode',
+                       prop10:   'tones',
+                       prop11:   'section',
+                       prop13:   'series',
+                       prop25:   'blogs',
+                       prop14:   'buildNumber',
+                       prop47:   'edition'  
+                };
+
+                for (var p in mappings) { 
+                    s[p] = this.getPageProperty(mappings[p]);;
+                }
+
+            },
+
+            logPageView: function() {
+                s.t();
+            }
+        
         }
-        s.pageName  = webTitle + ':' + (guardian.page.contentType || '') + ':' + (guardian.page.pageCode || '');
 
-        s.pageType  = guardian.page.contentType || '';  //pageType
-        s.prop9     = guardian.page.contentType || '';     //contentType
+        return Omniture;
+    }
+)
 
-        s.channel   = guardian.page.section || '';
-        s.prop4     = guardian.page.keywords || '';
-        s.prop6     = guardian.page.author || '';
-        s.prop8     = guardian.page.pageCode || '';
-        s.prop10    = guardian.page.tones || '';
-
-        s.prop11    = guardian.page.section || ''; //Third Level Mlc
-        s.prop13    = guardian.page.series || '';
-        s.prop25    = guardian.page.blogs || '';
-
-        s.prop14    = guardian.page.buildNumber || '';
-
-        s.prop47    = guardian.page.edition || '';
-
-        s.prop48    = detect.getConnectionSpeed();
-
-        s.prop56    = detect.getLayoutMode();
-
-        if (guardian.page.webPublicationDate) {  //at the moment we have web pub date for content and nothing else
-            s.prop30 = 'content';
-        } else {
-            s.prop30 = 'non-content';
-        }
-
-        //this fires off the omniture tracking
-        s.t();
-
+/*
         function findComponentName(element, trackingName){
             var tag = element.tagName.toLowerCase();
             if (tag === 'body') {
@@ -90,7 +105,9 @@ require([
             }
             s.tl(shouldDelay,'o',componentName);
         });
-});
+
+        });
+*/
 
 //TODO still need to figure out what to do with this data
 //        s.server='02';                            NOT SURE WE CAN DO THIS AT THE MOMENT
