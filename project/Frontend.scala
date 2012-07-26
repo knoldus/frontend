@@ -1,3 +1,4 @@
+import com.gu.SbtJasminePlugin._
 import com.gu.deploy.PlayArtifact._
 import com.gu.deploy.PlayAssetHash._
 import com.typesafe.sbtscalariform.ScalariformPlugin._
@@ -19,9 +20,10 @@ object Frontend extends Build with Prototypes {
   val tag = application("tag").dependsOn(common)
   val section = application("section").dependsOn(common)
   val front = application("front").dependsOn(common)
+  val coreNavigation = application("core-navigation").dependsOn(common)
 
   val main = root().aggregate(
-    common, article, gallery, tag, section, front
+    common, article, gallery, tag, section, front, coreNavigation
   )
 }
 
@@ -37,6 +39,7 @@ trait Prototypes {
   def base(name: String) = PlayProject(name, version, path = file(name), mainLang = SCALA)
     .settings(playAssetHashDistSettings: _*)
     .settings(scalariformSettings: _*)
+    .settings(jasmineSettings : _*)
     .settings(
       scalaVersion := "2.9.1",
 
@@ -70,6 +73,11 @@ trait Prototypes {
       // Copy unit test resources https://groups.google.com/d/topic/play-framework/XD3X6R-s5Mc/discussion
       unmanagedClasspath in Test <+= (baseDirectory) map { bd => Attributed.blank(bd / "test") },
 
+      appJsDir <+= baseDirectory { base => base / "app" / "assets" / "javascript" },
+      appJsLibDir <+= baseDirectory { base => base / "app" / "assets" / "javascript" / "lib" },
+      jasmineTestDir <+= baseDirectory { base => base / "test" / "assets" / "javascript"  },
+      jasmineConfFile <+= baseDirectory { base => base / "test" / "assets" / "javascript"  / "test.dependencies.js" },
+
       templatesImport ++= Seq(
         "common._",
         "model._",
@@ -100,14 +108,10 @@ trait Prototypes {
 
   def application(name: String) = base(name).settings(
     staticFilesPackage := "frontend-static",
-    templatesImport ++= Seq(
-      "conf.Static"
-    ),
     executableName := "frontend-%s" format  name,
-    jarName in assembly <<= (executableName) { "%s.jar" format _ },
+    jarName in assembly <<= executableName { "%s.jar" format _ },
     //these merge strategies are for the htmlcompressor
-    mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
-      {
+    mergeStrategy in assembly <<= (mergeStrategy in assembly) { old => {
         case s: String if s.startsWith("org/mozilla/javascript/") => MergeStrategy.first
         case s: String if s.startsWith("jargs/gnu/") => MergeStrategy.first
         case "README" => MergeStrategy.first
