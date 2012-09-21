@@ -14,7 +14,8 @@ define([
         'modules/detect',
         'modules/navigation/top-stories.js',
         'modules/navigation/controls.js',
-        'domReady'
+        'domReady',
+        'modules/discussion'
     ],
     function (
         common,
@@ -32,7 +33,8 @@ define([
         detect,
         TopStories,
         NavigationControls,
-        domReady) {
+        domReady,
+        Discussion) {
 
         var modules = {
 
@@ -116,6 +118,13 @@ define([
 
             showTabs: function () {
                 var tabs = new Tabs().init();
+            },
+
+            loadDiscussion: function(config) {
+                if (!this.isNetworkFront) { // should check if article
+                    var d = new Discussion();
+                    d.fetch(config);
+                }
             }
          
         };
@@ -131,6 +140,7 @@ define([
         modules.loadOmnitureAnalytics(config);
         modules.loadFonts(config, navigator.userAgent, userPrefs);
         modules.loadOphanAnalytics();
+        modules.loadDiscussion(config);
     };
 
     // domReady proxy for bootstrap
