@@ -38,6 +38,12 @@ define([
 
         var modules = {
 
+            removeAdvert: function () {
+                setTimeout(function() { 
+                    document.body.style.backgroundImage = 'none';
+                }, 1500);
+            },
+
             upgradeImages: function () {
                 var i = new Images();
                 i.upgrade();
@@ -134,6 +140,7 @@ define([
 
         var isNetworkFront = (config.page.pageId === "");
         
+        modules.removeAdvert();
         modules.upgradeImages();
         modules.transcludeRelated(config);
         modules.showRelativeDates();
