@@ -2,7 +2,6 @@ Feature: Typography
 
     Scenario: Setting the typeface
         Given I visit a page
-        When I set the querystring to ?gu.prefs.font-family=1
         Then the typeface should be rendered as Egyptian
 
     Scenario: Unsetting the typeface

@@ -1,3 +1,5 @@
+# move to scala test
+#
 Feature: Galleries in articles
 
 In order to view the Guardian's beautiful photography

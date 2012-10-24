@@ -1,15 +1,13 @@
+# remove and compare with Grant's 
+
+
+
+
 Feature: Football fixtures
 
     In order to view recent football results and upcoming fixtures
     As a Guardian reader 
     I want to see some football stats
-
-    Nb.
-    ---
-
-    - Notes - there's ~23 divisions and competitions 
-    - The API *should* let us Replay matches - for the purpose of testing, and developing against.   
-    - Caching should be 10 seconds
 
     Scenario: Fixture pages for all competitions/leagues
         Given I visit the fixtures page
