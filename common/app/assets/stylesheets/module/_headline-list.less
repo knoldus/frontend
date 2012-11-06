@@ -1,0 +1,40 @@
+.headline-list ul {
+    margin: 0 @gutter;
+}
+
+.headline-list li {
+	display: block;
+	overflow: auto;
+    border-bottom: 1px solid #DDD;
+    padding: @baseline*2 0;
+}
+
+.headline-list li:last-child {
+	border-bottom: none;
+}
+
+.headline-list p {
+    float: left;
+    width: 82%;
+    padding-left: @baseline*3;
+}
+
+.headline-list a {
+	color: #333;
+}
+.headline-list a:visited{
+	color:#777;
+}
+
+.headline-list .count {
+	.type-3;
+    float:left;
+    width: auto;
+    padding-left: 8px;
+    color: #777;
+}
+
+// this feels a bit filthy. sorry.
+.headline-list li:nth-child(10) .count {
+    padding-left: 0;
+}

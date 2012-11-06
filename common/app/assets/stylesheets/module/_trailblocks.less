@@ -1,0 +1,112 @@
+.trailblock.rolled-up,
+.trailblock.rolled-out {
+    margin-top: 0px;
+}
+
+.trail {
+    overflow: hidden;
+    margin-bottom: @baseline;
+    border-bottom: 1px solid #e3e3db;
+    padding: @baseline*2 0 @baseline*3 0;
+}
+
+.trail:first-child {
+    padding-top: @baseline*3
+}
+
+.trail.has-image {
+    padding-bottom: 0;
+}
+
+.trail.has-image img {
+    vertical-align: bottom;
+}
+
+.trail:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.trail-headline {
+    padding: 0 @gutter;
+}
+
+.trailblock-topstories .trail-headline {
+    .type-3;
+}
+
+.media .trail-headline {
+    padding: 0;
+}
+
+.trail-text {
+    display: block;
+    clear: left;
+    padding: 0 @gutter;
+}
+
+.media .trail-text {
+    padding: 0;
+}
+
+.has-image .trail-text {
+    padding-bottom: @baseline*4;
+}
+
+.trailblock .media {
+    padding: 0 @gutter @baseline*1 @gutter;
+}
+
+.trailblock .media-img { width: 40%; }
+
+.trailblock .media-img img {
+    width: @trailblockImgWidth;
+    margin-bottom: 5px;
+    margin-top: 3px;
+}
+
+.trailblock .img-large img {
+    width: @trailblockImgWidthLarge;
+}
+
+.trailblock .panel {
+    border-top: 1px solid #e3e3db;
+}
+
+.trailblock ul {
+    margin-bottom: 0px;
+}
+
+.trailblock.shut .count {
+    display: inline-block;
+}
+
+.trailblock .panel .trail-headline {
+    .type-3;
+}
+
+.trailblock-topstories li:first-child .b2 { border-top:none;}
+
+.toggle-trailblock {
+    .type-6;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    color: #fff;
+    padding: @baseline*4 @gutter;
+    cursor: pointer;
+    background-color: transparent;
+    box-shadow: none;
+    text-shadow: none;
+    border: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+}
+
+.toggle-trailblock:hover,
+.toggle-trailblock:active {
+    box-shadow: none;
+    background-color: transparent;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+}

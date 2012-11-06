@@ -1,0 +1,65 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# For dev machines
+GET     /assets/*file                         controllers.Assets.at(path="/public", file)
+
+
+#Note the order of these is important
+
+
+#Core nav
+GET     /most-popular/*edition/*path                    controllers.MostPopularController.render(edition, path)
+GET     /most-popular/*edition                          controllers.MostPopularController.renderGlobal(edition)
+
+GET     /top-stories/*edition                           controllers.TopStoriesController.render(edition)
+
+GET     /related/:edition/*path                         controllers.RelatedController.render(edition, path)
+
+
+#Football
+GET     /football/fixtures/:year/:month/:day                controllers.FixturesController.renderFor(year, month, day)
+GET     /football/fixtures                                  controllers.FixturesController.render()
+GET     /football/:competition/fixtures/:year/:month/:day   controllers.CompetitionFixturesController.renderFor(year, month, day, competition)
+GET     /football/:competition/fixtures                     controllers.CompetitionFixturesController.render(competition)
+
+GET     /football/results/:year/:month/:day                 controllers.ResultsController.renderFor(year, month, day)
+GET     /football/results                                   controllers.ResultsController.render()
+GET     /football/:competition/results/:year/:month/:day    controllers.CompetitionResultsController.renderFor(year, month, day, competition)
+GET     /football/:competition/results                      controllers.CompetitionResultsController.render(competition)
+
+GET     /football/live                                      controllers.LiveMatchesController.render()
+GET     /football/:competition/live                         controllers.LiveMatchesController.renderFor(competition)
+
+GET     /football/tables                                    controllers.LeagueTableController.render()
+GET     /football/:competition/table                        controllers.LeagueTableController.renderCompetition(competition)
+
+GET     /football/api/frontscores                           controllers.FrontScoresController.render()
+
+GET     /football/competitions                              controllers.CompetitionListController.render()
+GET     /football/teams                                     controllers.LeagueTableController.renderTeamlist()
+
+#Front
+GET     /_warmup                              controllers.FrontController.warmup()
+GET     /_up                                  controllers.FrontController.isUp()
+GET     /                                     controllers.FrontController.render(path = "front")
+GET     /$path<culture|sport>                 controllers.FrontController.render(path)
+
+
+#Video
+GET     /$path<.*/video/.*>                   controllers.VideoController.render(path)
+
+#Gallery
+GET     /$path<.*/gallery/.*>                 controllers.GalleryController.render(path)
+
+#Tag
+GET     /$path<[\w\d-]*/[\w\d-]*>             controllers.TagController.render(path)
+GET     /$path<[\w\d-]*/[\w\d-]*/[\w\d-]*>    controllers.TagController.render(path)
+
+#Section
+GET		/sections							  controllers.SectionsController.render()
+GET     /$path<[\w\d-]*>                      controllers.SectionController.render(path)
+
+#Articles
+GET     /*path                                controllers.ArticleController.render(path)

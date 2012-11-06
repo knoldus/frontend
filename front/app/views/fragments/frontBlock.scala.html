@@ -1,34 +1,40 @@
-@(block: FrontBlock)
+@(block: Trailblock, edition: String)(implicit request: RequestHeader)
 
+    <section class="front-section zone-@block.description.section">
 
-<div data-link-name="front block @block.item.name">
-    <div class="line">
-        <div class="unit lastUnit">
-            @if(block.item.id == "/") {
-            @fragments.headline(block.item.name)
+        <div class="front-section-head zone-background">
+            @if(block.description.id == "") {
+                @fragments.headline(block.description.name)
             } else {
-                <a data-link-name="heading link" href="@block.item.id">@fragments.headline(block.item.name)</a>
+                <a data-link-name="heading link" href="/@block.description.id">@fragments.headline(block.description.name)</a>
+            }
+
+            <button class="initially-off js-toggle-trailblock toggle-trailblock" data-zone-name="@edition.toLowerCase()"
+            data-block-name="@SafeName(block.description)"
+            id="js-trigger-@SafeName(block.description)"
+            data-link-name="Hide">Hide</button>
+        </div>
+
+        <div class="trailblock js-front-trailblock rolled-out"
+            id="front-trailblock-@SafeName(block.description)"
+            data-count="@{block.trails.length - block.description.numItemsVisible}"
+            data-link-name="Front | block | @block.description.name">
+
+            <ul class="unstyled">
+                @block.trails.zipWithRowInfo.map{ case (trail, info) =>
+                    <li class="trail @if(info.rowNum == 1 && trail.mainPicture) { has-image }" data-link-name="trail">
+                        @formatFrontTrail(trail, info, numberOfImagesToEnlarge=block.description.numLargeImages)
+                    </li>
+                }.slice( 0, block.description.numItemsVisible )
+            </ul>
+
+            @if( block.trails.length > block.description.numItemsVisible) {
+                <ul class="unstyled panel">
+                    @block.trails.zipWithRowInfo.map{ case (trail, info) =>
+                        <li class="trail" data-link-name="trail">@formatFrontTrail(trail, info, numberOfImagesToEnlarge=block.description.numLargeImages)</li>
+                    }.slice( block.description.numItemsVisible, block.trails.length )
+                </ul>
             }
         </div>
-    </div>
-    <div class="line trailblock show-@block.item.numItemsVisible">
-        @defining(block.trails.length){ numTrails =>
 
-        <ul class="plain">
-            @block.trails.zipWithRowInfo.map{ case(trail, row) =>
-            <li>@if(block.item.id == "/"){
-                    @fragments.formatTrailWithSection(trail)
-                } else {
-                    @fragments.formatTrail(trail)
-                }
-            </li>
-            }
-        </ul>
-
-        @if(numTrails > block.item.numItemsVisible) {
-        <h3 class="b1 b1b expander"><a class="js-expand-trailblock" data-link-name="more editors picks" href="javascript://">More @block.item.name.toLowerCase</a> <span class="count">@(numTrails - block.item.numItemsVisible)</span></h3>
-        }
-
-        }
-    </div>
-</div>
+    </section>

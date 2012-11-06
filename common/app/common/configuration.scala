@@ -3,8 +3,30 @@ package common
 import com.gu.conf.ConfigurationFactory
 import com.gu.management.{ Manifest => ManifestFile }
 
-class GuardianConfiguration(val application: String, val webappConfDirectory: String = "env") {
+class BaseGuardianConfiguration(val application: String, val webappConfDirectory: String = "env") {
   protected val configuration = ConfigurationFactory.getConfiguration(application, webappConfDirectory)
+
+  object healthcheck {
+    lazy val properties = configuration.getPropertyNames filter {
+      _ matches """healthcheck\..*\.url"""
+    }
+
+    lazy val urls = properties map { property =>
+      configuration.getStringProperty(property).get
+    }
+  }
+
+  object debug {
+    lazy val enabled: Boolean = configuration.getStringProperty("debug.enabled").map(_.toBoolean).getOrElse(true)
+  }
+
+  override def toString(): String = configuration.toString
+}
+
+class GuardianConfiguration(
+  override val application: String,
+  override val webappConfDirectory: String = "env")
+    extends BaseGuardianConfiguration(application, webappConfDirectory) {
 
   object contentApi {
     lazy val host = configuration.getStringProperty("content.api.host") getOrElse {
@@ -41,13 +63,15 @@ class GuardianConfiguration(val application: String, val webappConfDirectory: St
     lazy val usHost = configuration.getStringProperty("edition.host.us").getOrElse {
       throw new IllegalStateException("US edition not configured")
     }
+    lazy val ukHost = configuration.getStringProperty("edition.host.uk").getOrElse {
+      throw new IllegalStateException("UK edition not configured")
+    }
     private lazy val editionsForHosts = Map(
+      ukHost -> "UK",
       usHost -> "US"
     )
     def apply(origin: Option[String]): String = origin flatMap { editionsForHosts.get(_) } getOrElse "UK"
   }
-
-  override def toString(): String = configuration.toString
 
   object javascript {
     lazy val pageData: Map[String, String] = {
@@ -60,9 +84,6 @@ class GuardianConfiguration(val application: String, val webappConfDirectory: St
     }
   }
 
-  object debug {
-    lazy val enabled: Boolean = configuration.getStringProperty("debug.enabled").map(_.toBoolean).getOrElse(true)
-  }
 }
 
 object ManifestData {

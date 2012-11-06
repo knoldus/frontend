@@ -1,27 +1,28 @@
 package test
 
-import org.openqa.selenium.htmlunit.HtmlUnitDriver
-import play.api.test._
-import play.api.test.Helpers._
+import conf.Configuration
+import org.fluentlenium.core.domain.FluentWebElement
+import play.api.test.TestBrowser
 
 object `package` {
 
-  /**
-   * Executes a block of code in a running server, with a test HtmlUnit browser.
-   */
-  def HtmlUnit[T](path: String)(block: TestBrowser => T): T = {
-    running(TestServer(3333), HTMLUNIT) {
-      browser =>
-        // http://stackoverflow.com/questions/7628243/intrincate-sites-using-htmlunit
-        browser.webDriver.asInstanceOf[HtmlUnitDriver] setJavascriptEnabled false
+  object HtmlUnit extends EditionalisedHtmlUnit(Configuration) {
 
-        browser.goTo("http://localhost:3333" + path)
-        block(browser)
+    import Configuration.edition._
+
+    override def UK[T](path: String)(block: TestBrowser => T): T = {
+      goTo("/_warmup", "http://" + ukHost)(browser => Unit)
+      super.UK(path)(block)
+    }
+
+    override def US[T](path: String)(block: TestBrowser => T): T = {
+      goTo("/_warmup", "http://" + usHost)(browser => Unit)
+      super.US(path)(block)
     }
   }
 
-  /**
-   * Executes a block of code in a FakeApplication.
-   */
-  def Fake[T](block: => T): T = running(FakeApplication()) { block }
+  implicit def webElement2rich(element: FluentWebElement) = new {
+    lazy val href = element.getAttribute("href")
+    def hasAttribute(name: String) = element.getAttribute(name) != null
+  }
 }

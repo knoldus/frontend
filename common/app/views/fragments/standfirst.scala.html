@@ -1,9 +1,12 @@
-@(standfirst: Option[String])
+@(content: model.Content)
 
-@standfirst.map { s =>
-    <p class="standfirst">
-        @withJsoup(s)(
-            InBodyLinkCleaner
+@content.standfirst.map { s =>
+    <p class="standfirst" itemprop="description" data-link-name="standfirst">
+        @withJsoup(BulletCleaner(s))(
+            InBodyLinkCleaner("in standfirst link")
         )
+        @content.starRating.map { s =>
+		    <span class="stars s-@s"><meta itemprop="reviewRating" content="@s">@s</meta> / 5 stars</span>
+		}
     </p>
 }

@@ -1,0 +1,25 @@
+@(video: Video, storyPackage: List[Trail])(implicit request: RequestHeader)
+
+@main(video, Static, Configuration, Switches.all){
+    <link rel="stylesheet" type="text/css" href='@Static("stylesheets/video.min.css")' />
+}{
+    @fragments.headline(video.headline)
+
+    <div id="player">
+        <video controls="controls">
+            @video.encodings.map{ encoding =>
+                <source src="@encoding.url"/>
+            }
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    @fragments.standfirst(video)
+
+    @if(storyPackage nonEmpty) {
+        @fragments.relatedTrails(storyPackage, heading = "More on this story", visibleTrails = 5)
+    } else {
+        <div id="related"></div>
+    }
+    <div id="most-popular"></div>
+}

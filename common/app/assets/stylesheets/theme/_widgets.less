@@ -1,0 +1,204 @@
+.b1 {
+    border-top: 1px solid #E3E3DB;
+}
+
+.b1b {
+    border-bottom: 1px solid #E3E3DB;
+}
+
+.b2 {
+    border-top: 1px dotted #999999;
+}
+
+.b2b {
+    border-bottom: 1px dotted #E3E3DB;
+}
+
+img.badge {
+    vertical-align: text-top;
+}
+
+.live-stamp a {
+    color: white;
+    text-decoration: none!important;
+}
+
+#debug-timestamp {
+    color: #d3d3d3;
+}
+
+.trail-headline a,
+.trail-headline a:hover,
+.trail-headline a:link,
+.trail-headline a:visited,
+.trail h2 a {
+    color: #333;
+}
+
+
+/*  credit for this microsprite:
+    @csswizardry: http://jsfiddle.net/csswizardry/KL5Vs/
+*/
+.stars {
+    display: block;
+    width: 65px;
+    position: relative;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.stars,
+.stars:after {
+    height:13px;
+    background-image: url(../images/star-sprite.1ece5491a4afa7e5f558d75717c754e7.png);
+}
+
+.stars:after{
+    content: "";
+    background-position: 0 -13px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.s-0:after { width: 0; }
+.s-1:after { width:13px; }
+.s-2:after { width:26px; }
+.s-3:after { width:39px; }
+.s-4:after { width:52px; }
+.s-5:after { width:65px; }
+
+#logo {
+    display: block;
+    text-indent: -1000px;
+    float: left;
+    margin: @baseline*2 @gutter;
+    .icon-guardian-logo-beta;
+}
+
+.svg #logo {
+    .svg-icon-guardian-logo-beta
+}
+
+.footer {
+    overflow: hidden;
+    margin: 0;
+    padding: @baseline*2 @gutter @baseline*4 @gutter;
+    background-color: #E3E3DB;
+}
+
+.footer p {
+    .type-8;
+    line-height: @baseline*3;
+    width: 42%;
+    margin: 0;
+    padding: @baseline*2 0 0 @gutter;
+    float:left;
+    color: #6F6F6E;
+}
+
+.footer p:first-of-type {
+    padding-top: @baseline*4;
+}
+
+.footer p a {
+    display: block;
+    line-height: @baseline*4;
+    color: #6F6F6E;
+    text-decoration: underline;
+}
+
+.cta {
+    display: block;
+    color: #545454;
+    font-size: 14px;
+    line-height: @baseline*2;
+    padding: @baseline*2 0 @baseline*2 0;
+    background-color: #e3e3db;
+    text-align: center;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow:none;
+    text-shadow: none;
+    border: none;
+}
+
+.cta:link,
+.cta:visited {
+    color: #545454;
+}
+
+.cta:hover,
+.cta:active {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+}
+
+.top,
+.top:link,
+.top:visited,
+.top:active {
+    .type-6;
+    float: left;
+    color: #545454;
+    padding: @baseline*4 @baseline @baseline*4 @gutter;
+}
+
+.top:before {
+    .rotate(180deg);
+    display: inline-block;
+    content: '▾';
+    margin-right: @baseline;
+}
+
+.i-date {
+    display: inline-block;
+    margin-right: 5px;
+    margin-bottom: -1px;
+    .icon-clock;
+}
+
+.svg .i-date {
+    .svg-icon-clock;
+    background-size: 100%;
+    width: 10px;
+    height: 10px;
+}
+
+.fixed-width-timestamp {
+    width: @trailblockImgWidth;
+    float: left;
+    margin-right: 10px;
+}
+
+.bullet {
+    font-size: 13px;
+    display: inline-block;
+    color: #999;
+    margin: @baseline/2 4px 0 0;
+}
+
+.bullet:first-of-type {
+    margin-top: @baseline;
+}
+
+.collapsible {
+      border-bottom: 1px solid #E3E3DB;
+      padding-bottom: 12px;
+      padding-right: 44px; // offsets icon
+      position: relative;
+      cursor: pointer;
+      margin-bottom: 0;
+}
+
+.collapsible i {
+    position: absolute;
+    right: @gutter;
+    display: inline-block;
+    top: 15%;
+}
+

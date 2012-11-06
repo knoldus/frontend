@@ -1,93 +1,51 @@
-@(article: Article, related: List[Trail], storyPackage: List[Trail])(implicit request: RequestHeader)
+@(article: Article, storyPackage: List[Trail])(implicit request: RequestHeader)
 
-<!DOCTYPE html>
+@main(article, Static, Configuration, Switches.all){ }{
+	<h2 class="article-zone type-2">
+    	<a class="zone-color" data-link-name="article section" href="/@article.section">@Html(article.sectionName)</a>
+	</h2>
 
-<html>
+	<article id="article" class="article @if(article.isLive){is-live}" itemprop="mainContentOfPage" itemscope itemtype="@article.schemaType">
 
-<head>
+        <header>
+            @fragments.dateline(article.webPublicationDate, article.isLive)
 
-    @fragments.commonJavaScriptSetup(Static)
-    @fragments.metaData(article, conf.Configuration)
+            @fragments.headline(article.headline)
 
-    <title>@Html(article.headline)</title>
+            @fragments.standfirst(article)
 
-    @fragments.commonCssSetup(Static)
-    <link rel="stylesheet" type="text/css" href="@Static("stylesheets/main.min.css")" />
+        </header>
 
-</head>
-
-<body class="zone-@article.section">
-    <div id="container">
-
-        <div class="line">
-            <div class="unit lastUnit">
-                @fragments.placeholders("tier1", 5)
-                @fragments.navigation(Static)
-                @fragments.headline(article.headline)
-                @fragments.standfirst(article.standfirst)
-            </div>
-        </div>
-
-        <div class="line">
-
-            <div class="unit size3of5">
-                
-                <article>
-
-                    @article.imageOfWidth(300, tolerance=160).map{ image =>
-                        <figure>
-                            <img class="maxed" src="@image.url" data-fullsrc='@article.imageOfWidth(460, tolerance=20).map {full=>@full.url}' data-width="@image.width" />
-                            <figcaption>@Html(image.caption.getOrElse(""))</figcaption>
-                        </figure>
-                    }
-
-                    <aside class="b2 b2b">
-                        @fragments.byline(article.byline, article)
-                        @fragments.dateline(article.webPublicationDate)
-                    </aside>
-            
-                    <div class="article-body">
-                        @withJsoup(article.body)(
-                            PictureCleaner(article),
-                            InBodyLinkCleaner
-                        )
-                    </div>
-
-                </article>
-
-            </div>
-
-            <div class="unit lastUnit">
-
-
-                @if(storyPackage nonEmpty) {
-                    @fragments.relatedTrails(storyPackage, heading = "More on this story", visibleTrails = 5)
-                } else {
-                    @fragments.relatedTrails(related, heading = "Related content", visibleTrails = 5)
+        @article.mainPicture.map{ mainPicture =>
+            @article.mainPicture(width=220).map{ smallCrop =>
+            <figure itemprop="associatedMedia primaryImageOfPage" itemscope itemtype="http://schema.org/ImageObject">
+                <img class="maxed" src="@smallCrop.url"
+                     data-fullsrc="@mainPicture.url"
+                     data-width="@mainPicture.width"
+                     itemprop="contentURL" />
+                @if(smallCrop.caption.headOption.getOrElse("").trim != "") {
+                <figcaption class="main-caption" itemprop="description">@Html(smallCrop.caption.getOrElse(""))</figcaption>
                 }
+            </figure>
+            }
+        }
 
-                @fragments.placeholders("tier2", 5)
+        @fragments.byline(article.byline, article)
 
-                <!--
-                    <h4>Related subjects</h4>
-                    <ul class="plain tags">
-                    @article.keywords.map{ tag =>
-                        @fragments.formatTags(tag)
-                    }
-                    </ul>
-                -->
+        @if(article.isLive) {
+            @fragments.autoUpdate()
+        }
 
-                @fragments.placeholders("tier3", 5)
-            </div>
+        <div class="article-body" itemprop="@if(article.isReview){reviewBody} else {articleBody}">
+		  @fragments.articleBody(article)
 
         </div>
+    </article>
 
-
-    </div>
-
-    @fragments.modeTest()
-
-    @fragments.debugInfo(conf.Configuration)
-    @fragments.analytics(article, conf.Configuration)
-</body>
-</html>
+    @if(storyPackage.nonEmpty && ABTest(request).isA) {
+        @fragments.relatedTrails(storyPackage, heading = "Related content", visibleTrails = 5)
+    } else {
+        <div id="js-related"></div>
+    }
+    <div id="js-popular"></div>
+}

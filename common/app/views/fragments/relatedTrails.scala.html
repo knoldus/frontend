@@ -1,18 +1,25 @@
-@(trails: Seq[Trail], heading: String, visibleTrails: Int)
+@(trails: Seq[Trail], heading: String, visibleTrails: Int, isShaded: Boolean = false)
 
 @defining(trails.length){ numTrails =>
-    <div class="trailblock show-@{visibleTrails}" id="js-expandable-related" data-link-name="related: @heading">
-        <h3>@Html(heading)</h3>
+    <div class="trailblock @if(isShaded){trailblock-shaded}"
+        id="related-trails" 
+        data-count="@{trails.length - visibleTrails}"
+        data-link-name="Related @heading">
         
-        <ul class="plain">
-        @* extra trails are hidden by css, up to a maximum of 10 *@
-        @trails.map{ trail =>
-            <li>@formatTrail(trail)</li>
-        }
+        <h3 class="type-2 article-zone">@Html(heading)</h3>
+
+        <ul class="unstyled">
+            @trails.zipWithRowInfo.map{ case (trail, info) =>
+                <li class="trail" data-link-name="trail">@formatTrail(trail, info, related=true)</li>
+            }.slice( 0, visibleTrails )
         </ul>
 
-        @if(numTrails > visibleTrails) {
-            <h3 class="b1 b1b expander"><a class="js-expand-trailblock" href="javascript://">More related content</a> <span class="count">@(numTrails - visibleTrails)</span></h3>
+        @if( trails.length > visibleTrails) {
+            <ul class="unstyled panel">
+                @trails.zipWithRowInfo.map{ case (trail, info) =>
+                    <li class="trail" data-link-name="trail">@formatTrail(trail, info, related=true)</li>
+                }.slice( visibleTrails, trails.length )
+            </ul>
         }
     </div>
 }

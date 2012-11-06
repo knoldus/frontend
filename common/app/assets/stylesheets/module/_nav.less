@@ -1,0 +1,209 @@
+/* Nav abstraction as per: csswizardry.com/2011/09/the-nav-abstraction */
+.nav {
+    list-style:none;
+    margin:0;
+    padding: @baseline *2 0 4px 0;
+}
+
+.nav > li,
+.nav > li > a {
+    .type-6;
+    display:inline-block;
+    zoom:1;
+}
+
+.nav-stacked > li{
+    display:list-item;
+}
+
+.nav-stacked > li > a {
+    padding: @baseline*2 0;
+    border-top: 1px solid #ddd;
+    display: block;
+    height: auto;
+}
+
+.nav-stacked a {
+    background-color: transparent;
+    color: #333;
+}
+
+.nav li:first-child a,
+.sections li:nth-child(2) a {
+    border-top:none;
+}
+
+.expander {
+    .type-8;
+    display: block;
+    padding-top: 5px;
+    color: #666;
+}
+
+.sections-control {
+    padding: 20px @gutter 10px 5px;
+}
+
+.sections-control span {
+    width: 24px;
+    height: 13px;
+    display: inline-block;
+    text-indent: -1000em;
+    .icon-menu;
+}
+
+.svg .sections-control span {
+    .svg-icon-menu
+}
+
+.sections .nav {
+    padding: @baseline*2 @gutter @baseline @gutter;
+}
+
+.sections li {
+    width: 46%;
+    margin-right: 3%;
+    display: inline-block; // doing this instead of float to prevent mixed item height float collision
+    vertical-align: top;
+}
+
+.sections .section-full {
+    width: 100%;
+    margin: 0;
+}
+
+.sections li:nth-child(even) {
+    float:right; // leaving this in because it aligns right edge correctly
+    margin-right: 0%;
+    margin-left: 3%;
+}
+
+.sections .section-divider {
+    padding: 0 0 @baseline*2 0;
+    margin: 0 @gutter;
+    border-top: 2px solid #E3E3DB;
+}
+
+.section-divider li:nth-child(odd) {
+    border-right: none;
+}
+
+.section-divider li:nth-child(odd) a {
+    margin-left: 0;
+    padding-right: @gutter;
+}
+
+.nav-popup {
+    -webkit-transform: translate3d(0,0,0);
+    position: relative;
+    z-index: 100;
+    background-color: #ffffff;
+    padding: 0;
+    list-style: none;
+    clear: both;
+    position: relative;
+    border-top: 1px solid  #D2D2D2;
+    border-bottom: 1px solid  #D2D2D2;
+    margin-bottom: -4px;
+    background: #ffffff;
+    background: -moz-linear-gradient(top,  #f2f2f2 0%, #ffffff 5%, #ffffff 95%, #f2f2f2 0%, 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f2f2f2), color-stop(5%,#ffffff), color-stop(95%,#ffffff), color-stop(100%,#f2f2f2));
+    background: -webkit-linear-gradient(top,  #f2f2f2 0%,#ffffff 5%, #ffffff 95%, #f2f2f2 100%);
+    background: -o-linear-gradient(top,  #f2f2f2 0%, #ffffff 5%, #ffffff 95%, #f2f2f2 100%);
+    background: -ms-linear-gradient(top,  #f2f2f2 0%, #ffffff 5%, #ffffff 95%, #f2f2f2 100%);
+    background: linear-gradient(to bottom,  #f2f2f2 0%, #ffffff 5%, #ffffff 95%, #f2f2f2 100%);
+}
+
+.nav-popup:after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: -(@navBorderWidth * 2);
+    right: @gutter + 2;
+    width: 0;
+    height: 0;
+    border-color: transparent transparent #F2F2F2 transparent; // border color should be same as div background color
+    border-style: solid;
+    border-width: @navBorderWidth;
+}
+
+.topstories-control {
+    font-size: 14px;
+    margin-top: @baseline*2;
+    padding: @baseline 10px @baseline 10px;
+    border-right: 1px solid #707272;
+}
+
+.top-stories ul {
+    margin: 0px !important;
+    padding-top: @baseline;
+    list-style: none;
+}
+
+.top-stories .trailblock {
+    margin-top: 0;
+}
+
+
+.sections-control:active,
+.topstories-control:hover {
+    text-decoration: none !important;
+}
+
+a.topstories-control, 
+.sections-control {
+    color: #707272;
+    background-color: transparent !important;
+    display: inline-block;
+    vertical-align: top;
+}
+
+#navigation-header,
+#navigation-footer {
+    float: right
+}
+
+#navigation-footer {
+    margin-top: @baseline;
+}
+
+.top-stories:after {
+    right: 65px !important;
+}
+
+.footer .nav {
+    float: left;
+    width: 48%;
+    margin: 0;
+}
+
+.footer .nav-stacked li a {
+    color: #6F6F6E;
+    margin-left: 0;
+    border-top-color: #b5b5b5;
+}
+
+.nav-multi h2 {
+    font-family: helvetica, arial, sans-serif;
+    font-weight: normal;
+    color: #999999;
+    margin-top: @baseline*4;
+    font-size: 14px;
+    border-bottom: 1px solid #DDD;
+    padding-bottom: @baseline;
+}
+
+// bit horrible, sorry
+
+.nav-multi li:first-child h2 {
+    margin-top: @baseline*2;
+}
+
+.nav-multi .sections > li a {
+    border-top: 1px solid #ddd;
+}
+
+.sections li:nth-child(-n+2) a {
+    border-top: none;
+    padding-top: 0;
+}

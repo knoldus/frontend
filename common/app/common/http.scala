@@ -1,22 +1,58 @@
 package common
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
-import play.api.mvc.{ Result, Results }
-import play.api.templates.Html
+import com.ning.http.client.{ AsyncHttpClient, ProxyServer, AsyncHttpClientConfig }
+import com.ning.http.client.providers.netty.{ NettyAsyncHttpProvider, NettyConnectionsPool }
+import dispatch.{ FunctionHandler, url }
 
-import org.scala_tools.time.Imports._
+case class Response(status: Int, body: String, statusLine: String)
 
-object CachedOk extends Results {
-  def apply(metaData: MetaData)(block: Html): Result = {
-    Ok(block).withHeaders {
-      metaData match {
-        case c: Content if c.isLive => "Cache-Control" -> "public, max-age=5"
-        case c: Content if c.lastModified > DateTime.now - 24.hours => "Cache-Control" -> "public, max-age=60"
-        case c: Content => "Cache-Control" -> "public, max-age=900" //15 minutes
+object Proxy {
+  def apply(config: GuardianConfiguration) = if (config.proxy.isDefined) {
+    Some(new ProxyServer(config.proxy.host, config.proxy.port))
+  } else {
+    None
+  }
+}
 
-        case _ => "Cache-Control" -> "public, max-age=60"
-      }
+trait HttpSupport {
+
+  lazy val maxConnections: Int = 10
+  lazy val connectionTimeoutInMs: Int = 1000
+  lazy val requestTimeoutInMs: Int = 2000
+  def proxy: Option[ProxyServer]
+  lazy val compressionEnabled: Boolean = true
+
+  lazy val config = {
+    val c = new AsyncHttpClientConfig.Builder()
+      .setAllowPoolingConnection(true)
+      .setMaximumConnectionsPerHost(maxConnections)
+      .setMaximumConnectionsTotal(maxConnections)
+      .setConnectionTimeoutInMs(connectionTimeoutInMs)
+      .setRequestTimeoutInMs(requestTimeoutInMs)
+      .setCompressionEnabled(compressionEnabled)
+      .setFollowRedirects(true)
+    proxy.foreach(c.setProxyServer(_))
+    c.build
+  }
+
+  object Client extends dispatch.Http {
+    override lazy val client = {
+      val connectionPool = new NettyConnectionsPool(new NettyAsyncHttpProvider(config))
+      new AsyncHttpClient(new AsyncHttpClientConfig.Builder(config).setConnectionsPool(connectionPool).build)
     }
   }
+
+  object http {
+
+    def GET(urlString: String): Response = {
+      val request = url(urlString).build
+      Client(request, httpResponseHandler)()
+    }
+  }
+
+  def httpResponseHandler = new FunctionHandler(r =>
+    Response(r.getStatusCode, r.getResponseBody("utf-8"), r.getStatusText)
+  )
+
+  def close() = Client.client.close()
 }

@@ -3,50 +3,46 @@ package controllers
 import com.gu.openplatform.contentapi.model.ItemResponse
 import common._
 import conf._
+import model._
 import play.api.mvc.{ RequestHeader, Controller, Action }
+import play.api.libs.concurrent.Akka
+import play.api.Play.current
 
 case class GalleryPage(
   gallery: Gallery,
-  related: List[Trail],
   storyPackage: List[Trail],
-  index: Int = 1,
-  trail: Boolean = false)
+  index: Int,
+  trail: Boolean)
 
 object GalleryController extends Controller with Logging {
 
   def render(path: String) = Action { implicit request =>
-    val page = lookup(path) map {
-      _.copy(
-        index = request.queryString.get("index") flatMap { _.head.toIntOption } getOrElse 1,
-        trail = request.queryString.get("trail") flatMap { _.head.toBooleanOption } getOrElse false
-      )
-    }
 
-    page map { renderGallery } getOrElse { NotFound }
+    val index = request.getQueryString("index") map (_.toInt) getOrElse 1
+    val isTrail = request.getQueryString("trail") map (_.toBoolean) getOrElse false
+
+    val promiseOfGalleryPage = Akka.future(lookup(path, index, isTrail))
+
+    Async {
+      promiseOfGalleryPage.map(_.map { renderGallery } getOrElse { NotFound })
+    }
   }
 
-  private def lookup(path: String)(implicit request: RequestHeader): Option[GalleryPage] = suppressApi404 {
+  private def lookup(path: String, index: Int, isTrail: Boolean)(implicit request: RequestHeader): Option[GalleryPage] = suppressApi404 {
     val edition = Edition(request, Configuration)
     log.info("Fetching gallery: " + path + " for edition " + edition)
-    val response: ItemResponse = ContentApi.item
-      .edition(edition)
-      .showTags("all")
+    val response: ItemResponse = ContentApi.item(path, edition)
       .showFields("all")
-      .showMedia("all")
-      .showRelated(true)
-      .showStoryPackage(true)
-      .itemId(path)
       .response
 
     val gallery = response.content.filter { _.isGallery } map { new Gallery(_) }
-    val related = response.relatedContent map { new Content(_) }
     val storyPackage = response.storyPackage map { new Content(_) }
 
-    gallery map { g => GalleryPage(g, related, storyPackage.filterNot(_.id == g.id)) }
+    gallery map { g => GalleryPage(g, storyPackage.filterNot(_.id == g.id), index, isTrail) }
   }
 
   private def renderGallery(model: GalleryPage)(implicit request: RequestHeader) =
-    CachedOk(model.gallery) {
-      Compressed(views.html.gallery(model.gallery, model.related, model.storyPackage, model.index, model.trail))
+    Cached(model.gallery) {
+      Ok(Compressed(views.html.gallery(model.gallery, model.storyPackage, model.index, model.trail)))
     }
 }

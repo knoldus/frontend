@@ -1,97 +1,58 @@
 package controllers
 
-import com.gu.openplatform.contentapi.model.ItemResponse
 import common._
 import conf._
-import play.api.mvc.{ RequestHeader, Controller, Action }
+import front.Front
+import model._
+import play.api.mvc._
 import play.api.libs.concurrent.Akka
-import akka.agent.Agent
+import play.api.Play.current
+import model.Trailblock
+import scala.Some
+import com.gu.openplatform.contentapi.model.ItemResponse
 
-case class NetworkFrontPage(blocks: Seq[FrontBlock])
+object FrontPage extends MetaData {
+  override val canonicalUrl = "http://www.guardian.co.uk"
+  override val id = ""
+  override val section = ""
+  override val webTitle = "The Guardian"
+  override lazy val analyticsName = "GFE:Network Front"
 
-object FrontController extends Controller with Logging {
-
-  object FrontMetaData extends MetaData {
-    override val canonicalUrl = "http://www.guardian.co.uk"
-    override val id = ""
-    override val section = ""
-    override val apiUrl = "http://content.guardianapis.com"
-    override val webTitle = "The Guardian"
-
-    override lazy val metaData: Map[String, Any] = super.metaData ++ Map(
-      "keywords" -> "",
-      "content-type" -> "Network Front"
-    )
-  }
-
-  def render() = Action { implicit request =>
-    val edition: String = Edition(request, Configuration)
-    renderFront(NetworkFrontPage(FrontTrails.blocksFor(edition)))
-  }
-
-  private def renderFront(model: NetworkFrontPage)(implicit request: RequestHeader) =
-    CachedOk(FrontMetaData) {
-      Compressed(views.html.front(FrontMetaData, model.blocks))
-    }
-}
-
-case class FrontItem(id: String, name: String, numItemsVisible: Int)
-case class FrontBlock(item: FrontItem, trails: Seq[Trail])
-
-object FrontTrails extends Logging {
-
-  import play.api.Play.current
-
-  private val frontItems = Seq(
-    FrontItem("/", "Top stories", 5),
-    FrontItem("/sport", "Sport", 3),
-    FrontItem("/football/euro2012", "Euro 2012", 3),
-    FrontItem("/commentisfree", "Comment", 3),
-    FrontItem("/culture", "Culture", 3),
-    FrontItem("/lifeandstyle", "Life & style", 3),
-    FrontItem("/business", "Business", 3)
+  override lazy val metaData: Map[String, Any] = super.metaData ++ Map(
+    "content-type" -> "Network Front"
   )
+}
 
-  private val ukAgents = frontItems map { _ -> Agent[Seq[Trail]](Nil)(Akka.system) } toMap
-  private val usAgents = frontItems map { _ -> Agent[Seq[Trail]](Nil)(Akka.system) } toMap
+class FrontController extends Controller with Logging {
 
-  def refresh() {
-    ukAgents foreach { case (item, agent) => agent.sendOff { s => loadTrails(item.id, "UK") } }
-    usAgents foreach { case (item, agent) => agent.sendOff { s => loadTrails(item.id, "US") } }
+  val front: Front = Front
+
+  def warmup() = Action {
+    val promiseOfWarmup = Akka.future(Front.warmup())
+    Async { promiseOfWarmup.map(warm => Ok("warm")) }
   }
 
-  def blocksFor(edition: String): Seq[FrontBlock] = {
-    val blockAgents = if (edition == "US") usAgents else ukAgents
-    val frontBlocks = frontItems map { item => FrontBlock(item, blockAgents(item)()) }
+  def isUp() = Action { Ok("Ok") }
 
-    frontBlocks.foldLeft(Seq.empty[FrontBlock]) {
-      case (blocks, FrontBlock(item, trails)) =>
-        val trailsAlreadyInList = blocks flatMap (_.trails) map (_.url)
-        val newBlocks = trails.filterNot(trailsAlreadyInList contains _.url) take 10
-        (blocks :+ FrontBlock(item, newBlocks)) filterNot (_.trails isEmpty)
+  def render(path: String) = Action { implicit request =>
+    val edition = Edition(request, Configuration)
+
+    val page: Option[MetaData] = path match {
+      case "front" => Some(FrontPage)
+      case _ => ContentApi.item(path, edition)
+        .showEditorsPicks(true)
+        .showMostViewed(true)
+        .response.section map { Section(_) }
     }
-  }
 
-  private def loadTrails(id: String, edition: String): Seq[Trail] = {
-
-    log.info("Refreshing item " + id + " for edition " + edition)
-
-    val response: ItemResponse = ContentApi.item
-      .edition(edition)
-      .showTags("all")
-      .showFields("trail-text,liveBloggingNow")
-      .showMedia("all")
-      .showEditorsPicks(true)
-      .showMostViewed(true)
-      .itemId(id)
-      .pageSize(15)
-      .response
-
-    val editorsPicks = response.editorsPicks map { new Content(_) }
-    val editorsPicksIds = editorsPicks map (_.id)
-    val latest = response.results map { new Content(_) } filterNot (c => editorsPicksIds contains (c.id))
-
-    (editorsPicks ++ latest)
+    page map { page =>
+      // get the trailblocks
+      val trailblocks: Seq[Trailblock] = front(path, edition)
+      if (trailblocks.isEmpty) InternalServerError
+      else Cached(page) { Ok(Compressed(views.html.front(page, trailblocks))) }
+    } getOrElse (InternalServerError)
   }
 
 }
+
+object FrontController extends FrontController

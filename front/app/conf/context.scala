@@ -4,16 +4,26 @@ import common._
 import com.gu.management._
 import com.gu.management.play._
 import logback.LogbackLevelPage
+import java.net.{ HttpURLConnection, URL }
+import common._
 
-object Configuration extends GuardianConfiguration("frontend-front", webappConfDirectory = "env")
+object Configuration extends GuardianConfiguration("frontend-front", webappConfDirectory = "env") {
 
-object ContentApi extends ContentApiClient(Configuration)
+  lazy val configUrl = configuration.getStringProperty("front.config")
+    .getOrElse(throw new RuntimeException("Front config url not set"))
 
-object Static extends Static(Configuration.static.path)
+}
+
+object ContentApi extends ContentApiClient(Configuration) {
+
+  //all calls from the front are async, none of them are blocking, so we allow a longer timeout.
+  override lazy val requestTimeoutInMs = 7000
+}
+
+object Static extends StaticAssets(Configuration.static.path)
 
 object Switches {
-  //  val switch = new DefaultSwitch("name", "Description Text")
-  val all: Seq[Switchable] = List(Healthcheck.switch)
+  val all: Seq[Switchable] = CommonSwitches.all // ++ new DefaultSwitch("name", "Description Text")
 }
 
 object Metrics {
@@ -25,7 +35,7 @@ object Management extends Management {
 
   lazy val pages = List(
     new ManifestPage,
-    new HealthcheckManagementPage,
+    new UrlPagesHealthcheckManagementPage(Configuration.healthcheck.urls.toList),
     new Switchboard(Switches.all, applicationName),
     StatusPage(applicationName, Metrics.all),
     new PropertiesPage(Configuration.toString),

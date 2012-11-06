@@ -1,33 +1,11 @@
-@(page: MetaData, blocks: Seq[FrontBlock])(implicit request: RequestHeader)
+@(front: MetaData, trailblocks: Seq[Trailblock])(implicit request: RequestHeader)
 
-<!DOCTYPE html>
-
-<html>
-
-<head>
-    <title>beta.guardian.co.uk</title>
-    @fragments.commonJavaScriptSetup(Static)
-    @fragments.metaData(page, conf.Configuration)
-
-    @fragments.commonCssSetup(Static)
-    <link rel="stylesheet" type="text/css" href="@Static("stylesheets/main.min.css")" />
-
-</head>
-
-<body>
-    <div id="container">
-        <div class="line">
-            <div class="unit lastUnit">
-                @fragments.placeholders("tier1", 5)
-                @fragments.navigation(Static)
-            </div>
-        </div>
-        @blocks.map{ block =>
-            @fragments.frontBlock(block)
+@main(front, Static, Configuration, Switches.all){
+}{
+    <div id="front-container" class="cf">
+        @trailblocks.map{ block =>
+            @fragments.frontBlock(block, Edition(request, Configuration))
         }
     </div>
-
-    @fragments.debugInfo(conf.Configuration)
-    @fragments.analytics(page, conf.Configuration)
-</body>
-</html>
+    <div id="js-popular"></div>
+}

@@ -1,18 +1,10 @@
 @(config: common.GuardianConfiguration)
 
-@if(config.debug.enabled) {
-     <div id="debug">
-        <strong>debug info</strong>
-        <ul>
-            <li>Screen height: <span id="screenHeight"></span></li>
-            <li>Screen width: <span id="screenWidth"></span></li>
-            <li>Window height: <span id="windowHeight"></span></li>
-            <li>Window width: <span id="windowWidth"></span></li>
-            <li>Layout mode: <span id="layout"></span></li>
-            <li>Connection Speed: <span id="bandwidth"></span></li>
-            <li>Battery: <span id="battery"></span></li>
-            <li>Pixel Ratio: <span id="pixelratio"></span></li>
-            <li>Retina display: <span id="retina"></span></li>
-        </ul>
-    </div>
-}
+@*
+  We are currently getting a lot of stale content served. Trying to figure out exactly how old.
+  Cannot view page source or headers easily on a mobile so putting this data at bottom of page.
+  This needs to be on the live site till we figure this out
+*@
+<div id="debug-timestamp">
+    page generated: @{new org.joda.time.DateTime().withZone(org.joda.time.DateTimeZone.forID("Europe/London")).toString("dd MMM yyyy HH.mm.ss z")}
+</div>

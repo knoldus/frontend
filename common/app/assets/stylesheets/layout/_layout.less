@@ -1,0 +1,30 @@
+#container {
+    clear: both;
+}
+
+.component {
+    margin-bottom: 20px;
+}
+
+.box-indent {
+    padding: 0 @gutter @baseline*1 @gutter;
+}
+
+.inline-image {
+    width: @inArticleInlineImgWidth;
+    float: left;
+    margin: 0;
+    margin-right: 10px;
+    margin-bottom: 15px;
+    margin-top: 3px;
+}
+
+.img-tiny.inline-image {
+    width: auto;
+    max-width: @inArticleInlineImgWidth;
+}
+
+.img-extended {
+    padding-top: 3px; /* using padding not margin to avoid margin collapse bug */
+    margin-bottom: 15px;
+}

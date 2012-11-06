@@ -1,12 +1,7 @@
-@(static: common.Static)
+@(static: StaticAssets, config: GuardianConfiguration)
 
-<link rel="shortcut icon" type="image/png" href="@static("images/favicon.png")">
+<link rel="stylesheet" media="screen" type="text/css" href="http://pasteup.guim.co.uk/0.0.2/css/pasteup.min.css" />
 
-<link rel="stylesheet" media="screen" type="text/css" href="http://pasteup.gu.com/0.0.1/css/pasteup.min.css" />
+<link rel="stylesheet" type="text/css" href="@static("stylesheets/main.min.css")" />
 
-<!-- Add layout styles for browsers over 400px or less than IE9, but not IE mobile or IE6. -->
-<link rel="stylesheet" media="screen and (min-width: 640px)" href="@static("stylesheets/grid.responsive.min.css")">
-
-<!--[if (lt IE 9) & (!IEMobile) & (gt IE6)]>
-    <link rel="stylesheet" type="text/css" href="@static("stylesheets/grid.responsive.min.css")">
-<![endif]-->
+<style class="initial" data-cache-name="WebEgyptian" data-cache-file-woff="@static("fonts/WebEgyptian.woff.js")" data-cache-file-ttf="@static("fonts/WebEgyptian.ttf.js")"></style>

@@ -1,10 +1,14 @@
 package views.support
 
+import com.gu.openplatform.contentapi.model.{ Tag => ApiTag }
+import model._
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
 import xml.XML
-import common.{ Image, Images, Tags, Tag }
-import com.gu.openplatform.contentapi.model.{ MediaAsset, Tag => ApiTag }
+import com.gu.openplatform.contentapi.model.MediaAsset
+import model.Image
+import scala.Some
+import model.Tag
 
 class TemplatesTest extends FlatSpec with ShouldMatchers {
 
@@ -55,43 +59,56 @@ class TemplatesTest extends FlatSpec with ShouldMatchers {
   "PictureCleaner" should "correctly format inline pictures" in {
 
     val images = new Images {
-      override val images = Seq(
-        Image(
-          MediaAsset("picture", "body", 1, Some("http://www.a.b.c/img.jpg"),
-            Some(Map("caption" -> "the caption", "width" -> "55")))
-        )
-      )
+      override val images = Nil
     }
 
     val body = XML.loadString(withJsoup(bodyTextWithInlineElements)(PictureCleaner(images)).text.trim)
 
-    val imgDivs = (body \\ "div").toList
+    val figures = (body \\ "figure").toList
 
-    val baseImg = imgDivs(1)
-    (baseImg \ "@class").text should be("img-base")
+    val baseImg = figures(1)
+    (baseImg \ "@class").text should be("img-base inline-image")
     (baseImg \ "img" \ "@class").text should be("gu-image")
     (baseImg \ "img" \ "@width").text should be("140")
-    (baseImg \ "p" \ "@class").text should be("caption")
-    (baseImg \ "p").text should be("the caption")
 
-    val medianImg = imgDivs(2)
-    (medianImg \ "@class").text should be("img-median")
+    val medianImg = figures(2)
+    (medianImg \ "@class").text should be("img-median inline-image")
     (medianImg \ "img" \ "@class").text should be("gu-image")
     (medianImg \ "img" \ "@width").text should be("250")
 
-    val extendedImg = imgDivs(0)
+    val extendedImg = figures(0)
     (extendedImg \ "@class").text should be("img-extended")
     (extendedImg \ "img" \ "@class").text should be("gu-image")
     (extendedImg \ "img" \ "@width").text should be("600")
+
+    (body \\ "figure").foreach { fig =>
+      (fig \ "@itemprop").text should be("associatedMedia")
+      (fig \ "@itemscope").text should be("")
+      (fig \ "@itemtype").text should be("http://schema.org/ImageObject")
+    }
+
+    (body \\ "figcaption").foreach { fig => (fig \ "@itemprop").text should be("description") }
   }
 
   "InBodyLinkCleaner" should "clean links" in {
-    val body = XML.loadString(withJsoup(bodyTextWithLinks)(InBodyLinkCleaner).text.trim)
+    val body = XML.loadString(withJsoup(bodyTextWithLinks)(InBodyLinkCleaner("in body link")).text.trim)
 
     val link = (body \\ "a").head
 
     (link \ "@href").text should be("/section/2011/jan/01/words-for-url")
 
+  }
+
+  "BlockCleaner" should "insert block ids in minute by minute content" in {
+
+    val body = withJsoup(bodyWithBLocks)(BlockNumberCleaner).text.trim
+
+    body should include("""<span id="block-14">some heading</span>""")
+    body should include("""<p id="block-1">some more text</p>""")
+  }
+
+  "BulletCleaner" should "format all bullets by wrapping in a span" in {
+    BulletCleaner("<p>Foo bar • foo</p>") should be("<p>Foo bar <span class=\"bullet\">•</span> foo</p>")
   }
 
   "RowInfo" should "add row info to a sequence" in {
@@ -127,6 +144,18 @@ class TemplatesTest extends FlatSpec with ShouldMatchers {
     last.rowClass should be("last odd")
   }
 
+  "SafeName" should "understand the Javascript name of top stories" in {
+    SafeName(TrailblockDescription("", "News", 3)) should be("top-stories")
+  }
+
+  it should "understand a section" in {
+    SafeName(TrailblockDescription("sport", "Sport", 3)) should be("sport")
+  }
+
+  it should "understand a tag" in {
+    SafeName(TrailblockDescription("sport/triathlon", "Sport", 3)) should be("sport-triathlon")
+  }
+
   private def tag(name: String = "name", tagType: String = "keyword", id: String = "/id") = {
     ApiTag(id = id, `type` = tagType, webTitle = name,
       sectionId = None, sectionName = None, webUrl = "weburl", apiUrl = "apiurl", references = Nil)
@@ -134,20 +163,33 @@ class TemplatesTest extends FlatSpec with ShouldMatchers {
 
   val bodyTextWithInlineElements = """
   <span>
-  <p>foo bar</p>
+    <p>more than hearty breakfast we asked if the hotel could find out if nearby Fraserburgh was open. "Yes, but bring your own snorkel," was the response. How could we resist?</p>
 
-  <img src="http://www.a.b.c/img3.jpg" class="gu-image" width="600" height="180"/>
+    <figure>
+      <img src='http://www.a.b.c/img3' alt='Meldrum House in Oldmeldrum\n' width='600' height='180' class='gu-image'/>
+    </figure>
 
-  <img src="http://www.a.b.c/img.jpg" class="gu-image" width="140" height="84"/>
+     <figure>
+       <img src='http://www.a.b.c/img.jpg' alt='Meldrum House in Oldmeldrum\n' width='140' height='84' class='gu-image'/>
+     </figure>
 
-  <p>lorem ipsum
-    <img src="http://www.a.b.c/img2.jpg" class="gu-image" width="250" height="100"/>
-  </p>
+
+     <figure>
+       <img src='http://www.a.b.c/img2.jpg' alt='Meldrum House in Oldmeldrum\n' width='250' height='100' class='gu-image'/>
+     </figure>
+
+
+    <p>But first to <a href="http://www.glengarioch.com/verify.php" title="">Glen Garioch distillery</a></p>
   </span>
-  """
+                                   """
 
   val bodyTextWithLinks = """
     <p>bar <a href="http://www.guardiannews.com/section/2011/jan/01/words-for-url">the link</a></p>
   """
+
+  val bodyWithBLocks = """<body>
+      <!-- Block 14 --><span>some heading</span><p>some text</p>
+      <!-- Block 1 --><p>some more text</p>
+    </body>"""
 
 }

@@ -1,18 +1,9 @@
 package common
 
 import com.gu.openplatform.contentapi.ApiError
-import com.gu.openplatform.contentapi.model.{ Content => ApiContent }
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.Logger
-import scala.math.abs
 
 object `package` {
-
-  implicit def content2Is(content: ApiContent) = new {
-    lazy val isArticle: Boolean = content.tags exists { _.id == "type/article" }
-    lazy val isGallery: Boolean = content.tags exists { _.id == "type/gallery" }
-  }
 
   implicit def string2ToOptions(s: String) = new {
     lazy val toIntOption: Option[Int] = try {
@@ -32,23 +23,6 @@ object `package` {
     lazy val dequote = s.replace("\"", "")
   }
 
-  implicit def int2RichInt(i: Int) = new {
-    def distanceFrom(j: Int) = abs(j - i)
-    def in(range: Range): Boolean = range contains i
-  }
-
-  implicit def dateTime2ToISODateTimeString(date: DateTime) = new {
-    lazy val toISODateTimeString: String = date.toString(ISODateTimeFormat.dateTime)
-  }
-
-  implicit def dateTime2ToISODateTimeNoMillisString(date: DateTime) = new {
-    lazy val toISODateTimeNoMillisString: String = date.toString(ISODateTimeFormat.dateTimeNoMillis)
-  }
-
-  implicit def iSODateTimeStringNoMillis2DateTime(s: String) = new {
-    lazy val parseISODateTimeNoMillis = ISODateTimeFormat.dateTimeNoMillis.parseDateTime(s)
-  }
-
   def suppressApi404[T](block: => Option[T])(implicit log: Logger): Option[T] = {
     try {
       block
@@ -57,5 +31,26 @@ object `package` {
         log.info("Got a 404 while calling content api: " + message)
         None
     }
+  }
+
+  def quietly(block: => Unit)(implicit log: Logger) = try {
+    block
+  } catch {
+    case e => log.error("Failing quietly on: " + e.getMessage, e)
+  }
+
+  def quietlyWithDefault[A](default: A)(block: => A)(implicit log: Logger) = try {
+    block
+  } catch {
+    case e =>
+      log.error("Failing quietly on: " + e.getMessage, e)
+      default
+  }
+}
+
+object Reference {
+  def apply(s: String) = {
+    val parts = s.split("/")
+    parts(0) -> parts(1)
   }
 }
